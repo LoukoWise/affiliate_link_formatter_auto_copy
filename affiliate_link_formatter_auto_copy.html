@@ -1,0 +1,99 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Affiliate Link Formatter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #00bfff;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    input, textarea, button {
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+      margin-top: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    #copiedMsg {
+      color: green;
+      margin-top: 8px;
+      display: none;
+    }
+    #errorMsg {
+      color: red;
+      margin-top: 10px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Affiliate Link Formatter</h2>
+    <input id="userLink" type="text" placeholder="Enter full affiliate URL (must include http:// or https://)">
+    <button onclick="formatLink()">Generate</button>
+    <textarea id="result" readonly placeholder="Your formatted link will appear here"></textarea>
+    <div id="copiedMsg">✅ Copied to clipboard!</div>
+    <div id="errorMsg">⚠️ Couldn’t detect an ID or username in the link.</div>
+  </div>
+
+  <script>
+    function formatLink() {
+      const input = document.getElementById("userLink").value.trim();
+      const result = document.getElementById("result");
+      const error = document.getElementById("errorMsg");
+      const copiedMsg = document.getElementById("copiedMsg");
+
+      result.value = "";
+      error.style.display = "none";
+      copiedMsg.style.display = "none";
+
+      if (!input.startsWith("http://") && !input.startsWith("https://")) {
+        error.style.display = "block";
+        return;
+      }
+
+      let formatted = "";
+      const queryRegex = /([?&])(ref|id|user|affiliate|aff|partner|rep)=([^&]+)/i;
+
+      if (queryRegex.test(input)) {
+        formatted = input.replace(queryRegex, "$1$2={param.id}");
+      } else if (/^https?:\/\/[^.]+\.hop\.clickbank\.net/i.test(input)) {
+        formatted = input.replace(/^https?:\/\/[^.]+/, "https://{param.id}");
+      } else if (/^https?:\/\/([^.]+)\.livegood\.com/i.test(input)) {
+        formatted = input.replace(/^https?:\/\/([^.]+)(\.livegood\.com)/i, "https://{param.id}$2");
+      } else if (/^https?:\/\/livegood\.com\/[^\/]+$/i.test(input)) {
+        formatted = input.replace(/^(https?:\/\/livegood\.com)\/[^\/]+$/i, "$1/{param.id}");
+      }
+
+      if (formatted) {
+        result.value = formatted;
+        result.select();
+        document.execCommand("copy");
+        copiedMsg.style.display = "block";
+      } else {
+        error.style.display = "block";
+      }
+    }
+  </script>
+</body>
+</html>
